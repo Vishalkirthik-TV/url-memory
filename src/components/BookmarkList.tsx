@@ -97,35 +97,49 @@ export default function BookmarkList({ initialBookmarks }: { initialBookmarks: B
 
     return (
         <div>
-            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {bookmarks.map((bookmark) => (
                     <li
                         key={bookmark.id}
-                        className="col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow"
+                        className="group relative col-span-1 rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md hover:ring-indigo-100"
                     >
-                        <div className="flex w-full items-center justify-between space-x-6 p-6">
-                            <div className="flex-1 truncate">
-                                <div className="flex items-center space-x-3">
-                                    <h3 className="truncate text-sm font-medium text-gray-900">
+                        <div className="flex items-start justify-between">
+                            <div className="flex-1 truncate pr-4">
+                                <div className="flex items-center gap-2">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                                    </div>
+                                    <h3 className="truncate text-base font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
                                         {bookmark.title}
                                     </h3>
                                 </div>
-                                <p className="mt-1 truncate text-sm text-gray-500">
+                                <p className="mt-2 truncate text-sm text-gray-500 pl-10">
                                     <a
                                         href={bookmark.url}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="hover:underline"
+                                        className="hover:underline hover:text-indigo-500 transition-colors"
                                     >
-                                        {bookmark.url}
+                                        {new URL(bookmark.url).hostname}
                                     </a>
                                 </p>
+                                <div className="mt-4 pl-10 flex items-center text-xs text-gray-400">
+                                    {new Date(bookmark.created_at).toLocaleDateString(undefined, {
+                                        month: 'short',
+                                        day: 'numeric',
+                                        year: 'numeric'
+                                    })}
+                                </div>
                             </div>
+
                             <button
                                 onClick={() => handleDelete(bookmark.id)}
-                                className="text-red-500 hover:text-red-700 text-sm"
+                                className="opacity-0 group-hover:opacity-100 transition-opacity p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg"
+                                title="Delete bookmark"
                             >
-                                Delete
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
                             </button>
                         </div>
                     </li>
