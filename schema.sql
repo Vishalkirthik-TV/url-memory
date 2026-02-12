@@ -24,3 +24,6 @@ create policy "Users can insert their own bookmarks"
 create policy "Users can delete their own bookmarks"
   on bookmarks for delete
   using (auth.uid() = user_id);
+
+-- Enable Realtime for the bookmarks table
+alter publication supabase_realtime add table bookmarks;
