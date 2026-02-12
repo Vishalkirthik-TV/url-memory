@@ -18,7 +18,7 @@ export default function AddBookmarkForm() {
     }
 
     return (
-        <div className="rounded-xl bg-white p-6 shadow-sm border border-gray-100">
+        <div className="rounded-xl bg-white p-6 border border-gray-200">
             <h2 className="mb-5 text-lg font-semibold leading-6 text-gray-900 flex items-center gap-2">
                 <svg className="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />

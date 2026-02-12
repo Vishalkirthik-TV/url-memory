@@ -101,7 +101,7 @@ export default function BookmarkList({ initialBookmarks }: { initialBookmarks: B
                 {bookmarks.map((bookmark) => (
                     <li
                         key={bookmark.id}
-                        className="group relative col-span-1 rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md hover:ring-indigo-100"
+                        className="group relative col-span-1 rounded-xl bg-white p-5 border border-gray-200 transition-colors hover:bg-gray-50"
                     >
                         <div className="flex items-start justify-between">
                             <div className="flex-1 truncate pr-4">

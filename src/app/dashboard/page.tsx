@@ -21,7 +21,7 @@ export default async function Dashboard() {
         .order("created_at", { ascending: false });
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-white">
             <Navbar />
             <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
                 <div className="mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
