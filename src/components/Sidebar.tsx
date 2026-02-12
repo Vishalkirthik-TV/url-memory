@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Link2, LayoutDashboard, Settings, HelpCircle, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { usePathname } from "next/navigation";
 
 interface SidebarProps {
     userEmail?: string;
@@ -11,6 +11,7 @@ interface SidebarProps {
 
 export default function Sidebar({ userEmail }: SidebarProps) {
     const [isCollapsed, setIsCollapsed] = useState(true);
+    const pathname = usePathname();
 
     useEffect(() => {
         // Desktop default
@@ -26,52 +27,39 @@ export default function Sidebar({ userEmail }: SidebarProps) {
     const menuItems = [
         { icon: LayoutDashboard, label: "Bookmarks", href: "/dashboard" },
         { icon: Settings, label: "Settings", href: "/dashboard/settings" },
-        { icon: HelpCircle, label: "Help & Support", href: "#" },
     ];
 
+    // Close sidebar on mobile when a link is clicked
+    const handleLinkClick = () => {
+        if (window.innerWidth < 768) {
+            setIsCollapsed(true);
+        }
+    };
+
     return (
-        <motion.aside
-            initial={false}
-            animate={{
-                width: isCollapsed ? 80 : 280,
-                x: 0
-            }}
-            className={`fixed left-0 top-0 h-screen bg-white border-r border-gray-100 z-50 flex flex-col transition-all duration-300 shadow-sm
-                max-md:w-[280px] max-md:fixed max-md:shadow-2xl
+        <aside
+            style={{ width: isCollapsed ? '80px' : '280px' }}
+            className={`fixed left-0 top-0 h-screen bg-white border-r border-gray-100 z-50 flex flex-col transition-[width,transform] duration-200 ease-in-out shadow-sm
+                max-md:w-[280px] max-md:fixed
                 ${isCollapsed ? 'max-md:-translate-x-full' : 'max-md:translate-x-0'}
             `}
         >
             {/* Logo Section */}
-            <div className="p-6 flex items-center justify-between">
-                <AnimatePresence mode="wait">
+            <div className="p-6 h-20 flex items-center justify-between">
+                <Link
+                    href="/"
+                    onClick={handleLinkClick}
+                    className={`flex items-center gap-2 hover:opacity-80 transition-opacity ${isCollapsed ? 'mx-auto' : ''}`}
+                >
+                    <div className={`bg-black rounded-lg flex items-center justify-center text-white shrink-0 transition-all ${isCollapsed ? 'h-10 w-10' : 'h-8 w-8'}`}>
+                        <Link2 className={`${isCollapsed ? 'w-6 h-6' : 'w-5 h-5'}`} />
+                    </div>
                     {!isCollapsed && (
-                        <motion.div
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -10 }}
-                            className="flex items-center gap-2 overflow-hidden"
-                        >
-                            <div className="h-8 w-8 bg-black rounded-lg flex items-center justify-center text-white shrink-0">
-                                <Link2 className="w-5 h-5" />
-                            </div>
-                            <span className="font-bold text-lg tracking-tight text-gray-900 whitespace-nowrap">
-                                Linqs
-                            </span>
-                        </motion.div>
+                        <span className="font-bold text-lg tracking-tight text-gray-900 whitespace-nowrap animate-in fade-in duration-200">
+                            Linqs
+                        </span>
                     )}
-                    {isCollapsed && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="mx-auto"
-                        >
-                            <div className="h-10 w-10 bg-black rounded-xl flex items-center justify-center text-white">
-                                <Link2 className="w-6 h-6" />
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                </Link>
             </div>
 
             {/* Collapse Toggle (Desktop) */}
@@ -91,19 +79,20 @@ export default function Sidebar({ userEmail }: SidebarProps) {
             </button>
 
             {/* Navigation Links */}
-            <nav className="flex-grow px-3 py-6 space-y-2">
+            <nav className="flex-grow px-3 py-6 space-y-1">
                 {menuItems.map((item) => (
                     <Link
                         key={item.label}
                         href={item.href}
-                        className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group ${item.label === "Bookmarks"
-                            ? "bg-gray-900 text-white shadow-lg shadow-gray-200"
+                        onClick={handleLinkClick}
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors group ${pathname === item.href
+                            ? "bg-gray-900 text-white shadow-sm"
                             : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
-                            }`}
+                            } ${isCollapsed ? 'justify-center' : ''}`}
                     >
-                        <item.icon className={`w-5 h-5 shrink-0 ${item.label === "Bookmarks" ? "text-indigo-400" : "group-hover:text-indigo-600"}`} />
+                        <item.icon className={`w-5 h-5 shrink-0 ${pathname === item.href ? "text-indigo-400" : "group-hover:text-indigo-600"}`} />
                         {!isCollapsed && (
-                            <span className="text-sm font-medium whitespace-nowrap">
+                            <span className="text-sm font-medium whitespace-nowrap animate-in fade-in duration-200">
                                 {item.label}
                             </span>
                         )}
@@ -112,35 +101,40 @@ export default function Sidebar({ userEmail }: SidebarProps) {
             </nav>
 
             {/* Bottom Section: User & Sign Out */}
-            <div className="p-4 border-t border-gray-100 space-y-4">
+            <div className={`p-4 border-t border-gray-100 transition-all ${isCollapsed ? 'items-center' : ''}`}>
                 {!isCollapsed && userEmail && (
-                    <div className="px-3 py-2">
-                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">User</p>
+                    <div className="px-3 py-2 mb-2 animate-in fade-in duration-200">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">User</p>
                         <div className="flex items-center gap-3">
-                            <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center text-white font-bold text-xs shrink-0">
+                            <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-sm">
                                 {userEmail.charAt(0).toUpperCase()}
                             </div>
-                            <p className="text-sm font-medium text-gray-900 truncate">
+                            <p className="text-sm font-semibold text-gray-900 truncate">
                                 {userEmail.split('@')[0]}
                             </p>
                         </div>
+                    </div>
+                )}
+                {isCollapsed && userEmail && (
+                    <div className="h-10 w-10 mx-auto rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-sm mb-4">
+                        {userEmail.charAt(0).toUpperCase()}
                     </div>
                 )}
 
                 <form action="/auth/signout" method="post">
                     <button
                         type="submit"
-                        className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all group"
+                        className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors group ${isCollapsed ? 'justify-center' : ''}`}
                     >
-                        <LogOut className="w-5 h-5 shrink-0 group-hover:rotate-12 transition-transform" />
+                        <LogOut className="w-5 h-5 shrink-0 transition-transform group-hover:translate-x-0.5" />
                         {!isCollapsed && (
-                            <span className="text-sm font-medium whitespace-nowrap">
+                            <span className="text-sm font-medium whitespace-nowrap animate-in fade-in duration-200">
                                 Sign out
                             </span>
                         )}
                     </button>
                 </form>
             </div>
-        </motion.aside>
+        </aside>
     );
 }
