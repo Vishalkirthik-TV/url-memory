@@ -48,3 +48,27 @@ export async function deleteBookmark(id: string) {
     revalidatePath("/dashboard");
     return { success: true };
 }
+
+export async function updateProfile(formData: FormData) {
+    const supabase = await createClient();
+
+    const fullName = formData.get("full_name") as string;
+    const username = formData.get("username") as string;
+    const bio = formData.get("bio") as string;
+
+    const { error } = await supabase.auth.updateUser({
+        data: {
+            full_name: fullName,
+            username: username,
+            bio: bio
+        }
+    });
+
+    if (error) {
+        return { error: error.message };
+    }
+
+    revalidatePath("/dashboard/settings");
+    revalidatePath("/dashboard");
+    return { success: true };
+}

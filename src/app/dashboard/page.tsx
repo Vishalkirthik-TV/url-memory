@@ -1,8 +1,9 @@
 import { createClient } from "@/utils/supabase/server";
-import LandingNavbar from "@/components/LandingNavbar";
+import Sidebar from "@/components/Sidebar";
 import { redirect } from "next/navigation";
 import AddBookmarkForm from "@/components/AddBookmarkForm";
 import BookmarkList from "@/components/BookmarkList";
+import MobileMenuTrigger from "@/components/MobileMenuTrigger";
 
 export default async function Dashboard() {
     const supabase = await createClient();
@@ -33,9 +34,12 @@ export default async function Dashboard() {
     const capitalizedUsername = username.charAt(0).toUpperCase() + username.slice(1);
 
     return (
-        <div className="min-h-screen bg-gray-50/50">
-            <LandingNavbar user={user} />
-            <main className="mx-auto max-w-5xl mt-8 px-4 py-12 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gray-50/50 flex transition-all duration-300">
+            <Sidebar userEmail={user.email} />
+
+            <main className="flex-1 transition-all duration-300 ml-0 md:ml-[280px] lg:ml-[280px] group-data-[collapsed=true]:md:ml-[80px] px-4 py-12 sm:px-6 lg:px-8">
+                <MobileMenuTrigger icon="dashboard" />
+
                 {/* Header Section */}
                 <div className="mb-12 space-y-4 text-center">
                     <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900">
