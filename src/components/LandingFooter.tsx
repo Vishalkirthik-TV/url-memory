@@ -6,7 +6,7 @@ import { Twitter, Github, Linkedin, Mail, ArrowRight, Link2 } from "lucide-react
 export default function LandingFooter() {
     return (
         <footer className="bg-white border-t border-gray-100">
-            <div className="container mx-auto px-4 py-16">
+            <div className="container mx-auto px-6 md:px-12 lg:px-20 py-16">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12 mb-16">
                     {/* Brand Column */}
                     <div className="lg:col-span-2 space-y-6">

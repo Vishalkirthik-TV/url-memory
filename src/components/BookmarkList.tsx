@@ -7,7 +7,7 @@ import { Trash2, Copy, ExternalLink, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Bookmark {
-    id: number;
+    id: string;
     url: string;
     title: string | null;
     created_at: string;
@@ -24,10 +24,11 @@ export default function BookmarkList({ initialBookmarks, userId }: BookmarkListP
     const [supabase] = useState(() => createClient());
 
     useEffect(() => {
-        setBookmarks(initialBookmarks);
+        if (!userId) return;
 
+        console.log("Setting up realtime subscription for user:", userId);
         const channel = supabase
-            .channel('realtime_bookmarks')
+            .channel(`realtime_bookmarks_${userId}`)
             .on(
                 'postgres_changes',
                 {
@@ -37,9 +38,9 @@ export default function BookmarkList({ initialBookmarks, userId }: BookmarkListP
                     filter: `user_id=eq.${userId}`
                 },
                 (payload) => {
+                    console.log("Realtime INSERT received:", payload.new);
                     const newBookmark = payload.new as Bookmark;
                     setBookmarks((current) => {
-                        // Avoid duplicates
                         if (current.some(b => b.id === newBookmark.id)) return current;
                         return [newBookmark, ...current];
                     });
@@ -53,24 +54,46 @@ export default function BookmarkList({ initialBookmarks, userId }: BookmarkListP
                     table: 'bookmarks',
                 },
                 (payload) => {
+                    console.log("Realtime DELETE received:", payload.old);
+                    const deletedId = payload.old.id;
                     setBookmarks((current) =>
-                        current.filter((bookmark) => bookmark.id !== payload.old.id)
+                        current.filter((bookmark) => bookmark.id !== deletedId)
                     );
                 }
             )
-            .subscribe();
+            .subscribe((status) => {
+                console.log("Subscription status:", status);
+            });
 
         return () => {
+            console.log("Cleaning up subscription");
             supabase.removeChannel(channel);
         };
-    }, [initialBookmarks, supabase, userId]);
+    }, [supabase, userId]);
 
-    const handleDelete = async (id: number) => {
+    // Sync state with props when they change (due to server-side revalidation)
+    useEffect(() => {
+        setBookmarks((current) => {
+            // Merge logic: Prefer server source but keep "recently added" items from realtime
+            // that might not have hit the revalidation cache yet.
+            const serverIds = new Set(initialBookmarks.map(b => b.id));
+            const recentlyAdded = current.filter(b => !serverIds.has(b.id));
+
+            // To prevent "resurrecting" deleted items that the server still thinks exist:
+            // We assume the server is the source of truth for the 'whole' list,
+            // but we allow Realtime to stay "ahead" of it.
+            return [...recentlyAdded, ...initialBookmarks].sort((a, b) =>
+                new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+            );
+        });
+    }, [initialBookmarks]);
+
+    const handleDelete = async (id: string) => {
         // Optimistic update
         const previousBookmarks = [...bookmarks];
         setBookmarks(curr => curr.filter(b => b.id !== id));
 
-        const result = await deleteBookmark(id.toString());
+        const result = await deleteBookmark(id);
         if (result?.error) {
             // Revert if error
             setBookmarks(previousBookmarks);

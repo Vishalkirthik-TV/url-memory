@@ -13,8 +13,10 @@ export default function LandingDemo() {
     const [isTyping, setIsTyping] = useState(false);
 
     useEffect(() => {
+        let isActive = true;
+
         const sequence = async () => {
-            while (true) {
+            while (isActive) {
                 // Reset
                 setIsTyping(false);
                 setText("");
@@ -24,21 +26,26 @@ export default function LandingDemo() {
                 ]);
 
                 // Wait before starting
+                if (!isActive) break;
                 await new Promise(r => setTimeout(r, 1000));
 
                 // Type URL
+                if (!isActive) break;
                 setIsTyping(true);
                 const targetText = "https://abstract.tech";
                 for (let i = 0; i <= targetText.length; i++) {
+                    if (!isActive) break;
                     setText(targetText.slice(0, i));
                     await new Promise(r => setTimeout(r, 50 + Math.random() * 30));
                 }
                 setIsTyping(false);
 
                 // Wait before "click"
+                if (!isActive) break;
                 await new Promise(r => setTimeout(r, 600));
 
                 // Add item
+                if (!isActive) break;
                 const newBookmark = {
                     id: 3,
                     title: "Abstract Tech",
@@ -47,14 +54,20 @@ export default function LandingDemo() {
                 };
 
                 setText("");
-                setBookmarks(prev => [newBookmark, ...prev]);
+                setBookmarks(prev => {
+                    // Prevent duplicate IDs in state if loops overlap
+                    if (prev.some(b => b.id === 3)) return prev;
+                    return [newBookmark, ...prev];
+                });
 
                 // Show result for a while
+                if (!isActive) break;
                 await new Promise(r => setTimeout(r, 4000));
             }
         };
 
         sequence();
+        return () => { isActive = false; };
     }, []);
 
     return (

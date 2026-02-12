@@ -20,20 +20,22 @@ export async function addBookmark(formData: FormData) {
         return { error: "Must be logged in" };
     }
 
-    const { data: insertedData, error } = await supabase.from("bookmarks").insert({
-        title,
-        url,
-        user_id: user.id,
-    });
+    const { data: insertedData, error } = await supabase
+        .from("bookmarks")
+        .insert({
+            title,
+            url,
+            user_id: user.id,
+        })
+        .select()
+        .single();
 
     if (error) {
         return { error: error.message };
     }
 
-
-
     revalidatePath("/dashboard");
-    return { success: true };
+    return { success: true, data: insertedData };
 }
 
 export async function deleteBookmark(id: string) {

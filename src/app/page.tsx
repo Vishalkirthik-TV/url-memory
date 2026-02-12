@@ -24,12 +24,12 @@ const staggerContainer = {
 
 export default function LandingPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-white selection:bg-indigo-100 selection:text-indigo-900 font-sans">
+    <div className="flex flex-col min-h-screen bg-white selection:bg-indigo-100 selection:text-indigo-900 font-sans mx-auto overflow-x-hidden">
       <LandingNavbar />
 
       <main className="flex-grow pt-32 pb-20">
         {/* Hero Section */}
-        <section className="container mx-auto px-4 text-center mb-32">
+        <section className="container mx-auto px-6 md:px-12 lg:px-20 text-center mb-32">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
             {/* Left Column: Text */}
             <motion.div
@@ -95,7 +95,7 @@ export default function LandingPage() {
         </section>
 
         {/* Benton Grid Features */}
-        <section id="features" className="container mx-auto px-4 py-24">
+        <section id="features" className="container mx-auto px-6 md:px-12 lg:px-20 py-24">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 mb-4">
               Everything you need, nothing you don't.
@@ -194,7 +194,7 @@ export default function LandingPage() {
         </section>
 
         {/* CTA Section */}
-        <section className="container mx-auto px-4 py-24">
+        <section className="container mx-auto px-6 md:px-12 lg:px-20 py-24">
           <div className="bg-black rounded-[3rem] p-12 md:p-24 text-center relative overflow-hidden">
             <div className="relative z-10 max-w-3xl mx-auto">
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
