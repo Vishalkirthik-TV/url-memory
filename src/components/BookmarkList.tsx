@@ -1,150 +1,169 @@
 "use client";
 
-import { createClient } from "@/utils/supabase/client";
 import { useEffect, useState } from "react";
+import { createClient } from "@/utils/supabase/client";
 import { deleteBookmark } from "@/app/actions";
-import { useRouter } from "next/navigation";
+import { Trash2, Copy, ExternalLink, Globe } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
-// Define the Bookmark type locally since we don't have a shared types file yet
-type Bookmark = {
-    id: string;
-    title: string;
+interface Bookmark {
+    id: number;
     url: string;
+    title: string | null;
     created_at: string;
-};
+}
 
-export default function BookmarkList({ initialBookmarks }: { initialBookmarks: Bookmark[] }) {
+interface BookmarkListProps {
+    initialBookmarks: Bookmark[];
+    userId: string;
+}
+
+export default function BookmarkList({ initialBookmarks, userId }: BookmarkListProps) {
     const [bookmarks, setBookmarks] = useState<Bookmark[]>(initialBookmarks);
+    // Create Supabase client only once
     const [supabase] = useState(() => createClient());
-    const router = useRouter();
 
     useEffect(() => {
         setBookmarks(initialBookmarks);
-    }, [initialBookmarks]);
 
-    useEffect(() => {
-        let channel: any;
-
-        const setupRealtime = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-
-            if (user) {
-                channel = supabase
-                    .channel("realtime bookmarks")
-                    .on(
-                        "postgres_changes",
-                        {
-                            event: "INSERT",
-                            schema: "public",
-                            table: "bookmarks",
-                            filter: `user_id=eq.${user.id}`,
-                        },
-                        (payload) => {
-                            const newBookmark = payload.new as Bookmark;
-                            setBookmarks((current) => {
-                                if (current.some(b => b.id === newBookmark.id)) {
-                                    return current;
-                                }
-                                return [newBookmark, ...current];
-                            });
-                            router.refresh();
-                        }
-                    )
-                    .on(
-                        "postgres_changes",
-                        {
-                            event: "DELETE",
-                            schema: "public",
-                            table: "bookmarks",
-                        },
-                        (payload) => {
-                            setBookmarks((current) =>
-                                current.filter((b) => b.id !== payload.old.id)
-                            );
-                            router.refresh();
-                        }
-                    )
-                    .subscribe();
-            }
-        };
-
-        setupRealtime();
+        const channel = supabase
+            .channel('realtime_bookmarks')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'bookmarks',
+                    filter: `user_id=eq.${userId}`
+                },
+                (payload) => {
+                    const newBookmark = payload.new as Bookmark;
+                    setBookmarks((current) => {
+                        // Avoid duplicates
+                        if (current.some(b => b.id === newBookmark.id)) return current;
+                        return [newBookmark, ...current];
+                    });
+                }
+            )
+            .on(
+                'postgres_changes',
+                {
+                    event: 'DELETE',
+                    schema: 'public',
+                    table: 'bookmarks',
+                },
+                (payload) => {
+                    setBookmarks((current) =>
+                        current.filter((bookmark) => bookmark.id !== payload.old.id)
+                    );
+                }
+            )
+            .subscribe();
 
         return () => {
-            if (channel) {
-                supabase.removeChannel(channel);
-            }
+            supabase.removeChannel(channel);
         };
-    }, [supabase, router]);
+    }, [initialBookmarks, supabase, userId]);
 
-    async function handleDelete(id: string) {
-        // Optimistic delete
-        setBookmarks((current) => current.filter((b) => b.id !== id));
-        const result = await deleteBookmark(id);
+    const handleDelete = async (id: number) => {
+        // Optimistic update
+        const previousBookmarks = [...bookmarks];
+        setBookmarks(curr => curr.filter(b => b.id !== id));
+
+        const result = await deleteBookmark(id.toString());
         if (result?.error) {
-            // revert if error
-            router.refresh();
+            // Revert if error
+            setBookmarks(previousBookmarks);
+            console.error("Failed to delete bookmark:", result.error);
         }
-    }
+    };
+
+    const copyToClipboard = (url: string) => {
+        navigator.clipboard.writeText(url);
+    };
+
+    // Helper to get favicon
+    const getFaviconUrl = (url: string) => {
+        try {
+            const domain = new URL(url).hostname;
+            return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+        } catch {
+            return null;
+        }
+    };
 
     if (bookmarks.length === 0) {
         return (
-            <div className="text-center py-12">
-                <p className="text-gray-500">No bookmarks yet. Add one above!</p>
+            <div className="text-center py-20 rounded-2xl border border-dashed border-gray-200 bg-gray-50/50">
+                <div className="mx-auto w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mb-4">
+                    <Globe className="w-6 h-6 text-gray-400" />
+                </div>
+                <h3 className="text-sm font-medium text-gray-900">No bookmarks yet</h3>
+                <p className="mt-1 text-sm text-gray-500">Paste a URL above to get started.</p>
             </div>
-        )
+        );
     }
 
     return (
-        <div>
-            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <AnimatePresence initial={false} mode="popLayout">
                 {bookmarks.map((bookmark) => (
-                    <li
+                    <motion.li
+                        layout
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
                         key={bookmark.id}
-                        className="group relative col-span-1 rounded-xl bg-white p-5 border border-gray-200 transition-colors hover:bg-gray-50"
+                        className="group relative col-span-1 rounded-2xl bg-white p-5 border border-gray-200 transition-all hover:border-gray-300 hover:shadow-lg hover:shadow-gray-100/50"
                     >
-                        <div className="flex items-start justify-between">
-                            <div className="flex-1 truncate pr-4">
-                                <div className="flex items-center gap-2">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-                                    </div>
-                                    <h3 className="truncate text-base font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
-                                        {bookmark.title}
-                                    </h3>
-                                </div>
-                                <p className="mt-2 truncate text-sm text-gray-500 pl-10">
-                                    <a
-                                        href={bookmark.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="hover:underline hover:text-indigo-500 transition-colors"
-                                    >
-                                        {new URL(bookmark.url).hostname}
-                                    </a>
-                                </p>
-                                <div className="mt-4 pl-10 flex items-center text-xs text-gray-400">
-                                    {new Date(bookmark.created_at).toLocaleDateString(undefined, {
-                                        month: 'short',
-                                        day: 'numeric',
-                                        year: 'numeric'
-                                    })}
-                                </div>
+                        <div className="flex items-start justify-between mb-4">
+                            <div className="h-10 w-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden shrink-0">
+                                <img
+                                    src={getFaviconUrl(bookmark.url) || ''}
+                                    alt="Icon"
+                                    className="w-5 h-5 object-contain"
+                                    onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                    }}
+                                />
+                                <Globe className="w-5 h-5 text-gray-400 hidden" />
                             </div>
-
-                            <button
-                                onClick={() => handleDelete(bookmark.id)}
-                                className="opacity-0 group-hover:opacity-100 transition-opacity p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg"
-                                title="Delete bookmark"
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                            </button>
+                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                    onClick={() => copyToClipboard(bookmark.url)}
+                                    className="p-1.5 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                                    title="Copy URL"
+                                >
+                                    <Copy className="w-4 h-4" />
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(bookmark.id)}
+                                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                    title="Delete"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
                         </div>
-                    </li>
+
+                        <div>
+                            <h3 className="text-sm font-semibold text-gray-900 truncate mb-1">
+                                {bookmark.title || bookmark.url}
+                            </h3>
+                            <a
+                                href={bookmark.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-gray-500 hover:text-indigo-600 truncate block transition-colors flex items-center gap-1"
+                            >
+                                {new URL(bookmark.url).hostname}
+                                <ExternalLink className="w-3 h-3 opacity-50" />
+                            </a>
+                        </div>
+                    </motion.li>
                 ))}
-            </ul>
-        </div>
+            </AnimatePresence>
+        </ul>
     );
 }

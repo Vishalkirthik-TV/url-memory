@@ -1,6 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import LandingDemo from "@/components/LandingDemo";
+import LandingNavbar from "@/components/LandingNavbar";
+import LandingFooter from "@/components/LandingFooter";
 import { motion } from "framer-motion";
 import { ArrowRight, Zap, Shield, Smartphone, Globe, Layout, CheckCircle2 } from "lucide-react";
 
@@ -22,127 +25,73 @@ const staggerContainer = {
 export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-white selection:bg-indigo-100 selection:text-indigo-900 font-sans">
-      {/* Navigation */}
-      <header className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 bg-black rounded-lg flex items-center justify-center text-white">
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
-                />
-              </svg>
-            </div>
-            <span className="font-bold text-lg tracking-tight text-gray-900">
-              SmartBookmarks
-            </span>
-          </div>
-          <nav className="hidden md:flex gap-8">
-            <Link href="#features" className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
-              Features
-            </Link>
-            <Link href="#pricing" className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
-              Pricing
-            </Link>
-            <Link href="/login" className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
-              Sign In
-            </Link>
-          </nav>
-          <Link
-            href="/login"
-            className="bg-black text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-gray-800 transition-all hover:scale-105 active:scale-95"
-          >
-            Get Started
-          </Link>
-        </div>
-      </header>
+      <LandingNavbar />
 
       <main className="flex-grow pt-32 pb-20">
         {/* Hero Section */}
         <section className="container mx-auto px-4 text-center mb-32">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={staggerContainer}
-            className="max-w-4xl mx-auto space-y-6"
-          >
-            <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 border border-gray-200 text-xs font-medium text-gray-600 mb-4">
-              <span className="flex h-2 w-2 rounded-full bg-green-500"></span>
-              v2.0 is now live
-            </motion.div>
-            <motion.h1
-              variants={fadeInUp}
-              className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 leading-[1.1]"
-            >
-              Your internet library, <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">
-                beautifully organized.
-              </span>
-            </motion.h1>
-            <motion.p
-              variants={fadeInUp}
-              className="text-xl text-gray-500 max-w-2xl mx-auto leading-relaxed"
-            >
-              Save links instantly, sync across devices, and organize with ease.
-              Experience the bookmark manager designed for the modern web.
-            </motion.p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
+            {/* Left Column: Text */}
             <motion.div
-              variants={fadeInUp}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
+              initial="hidden"
+              animate="visible"
+              variants={staggerContainer}
+              className="text-center lg:text-left space-y-8"
             >
-              <Link
-                href="/login"
-                className="group h-12 px-8 rounded-full bg-black text-white flex items-center gap-2 font-medium hover:bg-gray-800 transition-all hover:pr-6"
+              <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 border border-gray-200 text-xs font-medium text-gray-600">
+                <span className="flex h-2 w-2 rounded-full bg-green-500"></span>
+                v2.0 is now live
+              </motion.div>
+              <motion.h1
+                variants={fadeInUp}
+                className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 leading-[1.1]"
               >
-                Start for free
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <Link
-                href="#"
-                className="h-12 px-8 rounded-full border border-gray-200 text-gray-700 flex items-center font-medium hover:border-gray-400 hover:bg-gray-50 transition-all"
+                Your internet library, <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">
+                  beautifully organized.
+                </span>
+              </motion.h1>
+              <motion.p
+                variants={fadeInUp}
+                className="text-xl text-gray-500 leading-relaxed max-w-lg mx-auto lg:mx-0"
               >
-                View Demo
-              </Link>
+                Save links instantly, sync across devices, and organize with ease.
+                Experience the bookmark manager designed for the modern web.
+              </motion.p>
+              <motion.div
+                variants={fadeInUp}
+                className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4"
+              >
+                <Link
+                  href="/login"
+                  className="group h-12 px-8 rounded-full bg-black text-white flex items-center gap-2 font-medium hover:bg-gray-800 transition-all hover:pr-6"
+                >
+                  Start for free
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <Link
+                  href="#"
+                  className="h-12 px-8 rounded-full border border-gray-200 text-gray-700 flex items-center font-medium hover:border-gray-400 hover:bg-gray-50 transition-all"
+                >
+                  View Demo
+                </Link>
+              </motion.div>
             </motion.div>
-          </motion.div>
 
-          {/* Hero Visual */}
-          <motion.div
-            initial={{ opacity: 0, y: 100, rotateX: 20 }}
-            animate={{ opacity: 1, y: 0, rotateX: 0 }}
-            transition={{ duration: 1, delay: 0.5, type: "spring" }}
-            className="mt-20 max-w-5xl mx-auto perspective-1000"
-          >
-            <div className="relative rounded-2xl border border-gray-200 bg-white shadow-2xl overflow-hidden aspect-[16/9] md:aspect-[21/9]">
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 via-white to-violet-50/50"></div>
-              {/* Mock UI Elements */}
-              <div className="absolute top-0 left-0 w-full h-full p-8 flex flex-col gap-6 opacity-80">
-                <div className="h-8 w-1/3 bg-gray-100 rounded-lg animate-pulse"></div>
-                <div className="grid grid-cols-3 gap-6">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-40 rounded-xl bg-white shadow-sm border border-gray-100 p-4 space-y-3">
-                      <div className="h-8 w-8 rounded-lg bg-indigo-100"></div>
-                      <div className="h-4 w-3/4 bg-gray-50 rounded"></div>
-                      <div className="h-3 w-1/2 bg-gray-50 rounded"></div>
-                    </div>
-                  ))}
-                </div>
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="h-32 rounded-xl bg-white shadow-sm border border-gray-100"></div>
-                  <div className="h-32 rounded-xl bg-white shadow-sm border border-gray-100"></div>
-                </div>
+            {/* Right Column: Hero Visual */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="relative w-full perspective-1000"
+            >
+              <div className="relative z-10 scale-[0.85] md:scale-100 origin-top-center hover:scale-[1.02] transition-transform duration-500">
+                <LandingDemo />
               </div>
-              <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white to-transparent"></div>
-            </div>
-          </motion.div>
+              {/* Decorative Blob */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-tr from-indigo-100 to-violet-100 rounded-full blur-3xl -z-10 opacity-60"></div>
+            </motion.div>
+          </div>
         </section>
 
         {/* Benton Grid Features */}
@@ -270,22 +219,7 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="border-t border-gray-100 bg-white">
-        <div className="container mx-auto px-4 py-12 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="h-6 w-6 bg-black rounded flex items-center justify-center text-white text-xs">SB</div>
-            <span className="font-semibold text-gray-900">SmartBookmarks</span>
-          </div>
-          <p className="text-sm text-gray-500">
-            © {new Date().getFullYear()} Abstract Technologies. All rights reserved.
-          </p>
-          <div className="flex gap-6">
-            <a href="#" className="text-gray-400 hover:text-gray-900 transition-colors">Twitter</a>
-            <a href="#" className="text-gray-400 hover:text-gray-900 transition-colors">GitHub</a>
-            <a href="#" className="text-gray-400 hover:text-gray-900 transition-colors">LinkedIn</a>
-          </div>
-        </div>
-      </footer>
+      <LandingFooter />
     </div>
   );
 }

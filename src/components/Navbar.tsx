@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { Link2 } from "lucide-react";
 
 export default async function Navbar() {
     const supabase = await createClient();
@@ -20,9 +21,9 @@ export default async function Navbar() {
                 <div className="flex h-14 items-center justify-between">
                     <div className="flex items-center gap-2">
                         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-black text-white">
-                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
+                            <Link2 className="h-5 w-5" />
                         </div>
-                        <span className="text-sm font-semibold text-gray-900 tracking-tight">SmartBookmarks</span>
+                        <span className="text-xl font-bold text-gray-900 tracking-tight">Linqs</span>
                     </div>
                     <div className="flex items-center gap-4">
                         {user && (

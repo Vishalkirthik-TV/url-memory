@@ -32,7 +32,7 @@ export async function addBookmark(formData: FormData) {
 
 
 
-    revalidatePath("/");
+    revalidatePath("/dashboard");
     return { success: true };
 }
 
@@ -45,6 +45,6 @@ export async function deleteBookmark(id: string) {
         return { error: error.message };
     }
 
-    revalidatePath("/");
+    revalidatePath("/dashboard");
     return { success: true };
 }
