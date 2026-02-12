@@ -5,7 +5,13 @@ import { useState, useEffect } from "react";
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 import { Link2 } from "lucide-react";
 
-export default function LandingNavbar() {
+import { User } from "@supabase/supabase-js";
+
+interface LandingNavbarProps {
+    user?: User | null;
+}
+
+export default function LandingNavbar({ user }: LandingNavbarProps) {
     const { scrollY } = useScroll();
     const [isScrolled, setIsScrolled] = useState(false);
 
@@ -32,10 +38,10 @@ export default function LandingNavbar() {
                 </Link>
 
                 <nav className="hidden md:flex gap-8">
-                    {["Features", "Design", "Pricing", "FAQ"].map((item) => (
+                    {["Features", "Design"].map((item) => (
                         <Link
                             key={item}
-                            href={`#${item.toLowerCase()}`}
+                            href={`/#${item.toLowerCase()}`}
                             className="text-sm font-medium text-gray-600 hover:text-black transition-colors"
                         >
                             {item}
@@ -44,18 +50,36 @@ export default function LandingNavbar() {
                 </nav>
 
                 <div className="flex items-center gap-4">
-                    <Link
-                        href="/login"
-                        className="text-sm font-medium text-gray-600 hover:text-black transition-colors hidden sm:block"
-                    >
-                        Sign in
-                    </Link>
-                    <Link
-                        href="/login"
-                        className="bg-black text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-gray-800 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-gray-200"
-                    >
-                        Get Started
-                    </Link>
+                    {user ? (
+                        <div className="flex items-center gap-4">
+                            <form action="/auth/signout" method="post">
+                                <button
+                                    type="submit"
+                                    className="text-sm font-medium text-gray-600 hover:text-black transition-colors"
+                                >
+                                    Sign out
+                                </button>
+                            </form>
+                            <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center text-white font-bold text-xs">
+                                {user.email?.charAt(0).toUpperCase()}
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            <Link
+                                href="/login"
+                                className="text-sm font-medium text-gray-600 hover:text-black transition-colors hidden sm:block"
+                            >
+                                Sign in
+                            </Link>
+                            <Link
+                                href="/login"
+                                className="bg-black text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-gray-800 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-gray-200"
+                            >
+                                Get Started
+                            </Link>
+                        </>
+                    )}
                 </div>
             </div>
         </motion.header>

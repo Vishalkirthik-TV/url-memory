@@ -105,7 +105,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 grid-rows-2 gap-6 max-w-6xl mx-auto h-auto md:h-[600px]">
+          <div id="design" className="scroll-mt-24 grid grid-cols-1 md:grid-cols-3 grid-rows-2 gap-6 max-w-6xl mx-auto h-auto md:h-[600px]">
             {/* Feature 1: Large Left */}
             <motion.div
               whileHover={{ y: -5 }}
