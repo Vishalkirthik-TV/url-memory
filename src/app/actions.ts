@@ -74,3 +74,19 @@ export async function updateProfile(formData: FormData) {
     revalidatePath("/dashboard");
     return { success: true };
 }
+
+export async function toggleFavorite(id: string, isFavorite: boolean) {
+    const supabase = await createClient();
+
+    const { error } = await supabase
+        .from("bookmarks")
+        .update({ is_favorite: isFavorite })
+        .eq("id", id);
+
+    if (error) {
+        return { error: error.message };
+    }
+
+    revalidatePath("/dashboard");
+    return { success: true };
+}

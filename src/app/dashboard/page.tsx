@@ -16,10 +16,20 @@ export default async function Dashboard() {
         redirect("/login");
     }
 
-    const { data: bookmarks } = await supabase
+    const { data: bookmarks, error: fetchError } = await supabase
         .from("bookmarks")
         .select("*")
         .order("created_at", { ascending: false });
+
+    console.log("Dashboard fetch results:", {
+        count: bookmarks?.length,
+        firstItem: bookmarks?.[0] ? {
+            id: bookmarks[0].id,
+            title: bookmarks[0].title,
+            is_favorite: bookmarks[0].is_favorite
+        } : 'empty',
+        error: fetchError
+    });
 
     // Helper for time-based greeting
     const getGreeting = () => {
@@ -58,12 +68,6 @@ export default async function Dashboard() {
 
                     {/* Bookmarks Grid */}
                     <section className="relative z-0">
-                        <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
-                            <h2 className="text-xl font-semibold text-gray-900">My Collection</h2>
-                            <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                                {bookmarks?.length || 0} items
-                            </span>
-                        </div>
                         <BookmarkList initialBookmarks={bookmarks || []} userId={user.id} />
                     </section>
                 </div>
