@@ -1,6 +1,6 @@
-# Smart Bookmark App - Re-imagined
+# Smart Bookmark App - Linqs
 
-A premium, real-time bookmark manager built for speed and effortless organization. Built with Next.js 15, Supabase, and Tailwind CSS.
+Linqs is a real-time bookmark manager built for speed and effortless organization. Built with Next.js, Supabase, and Tailwind CSS.
 
 **Live Demo**: [url-memory-lyart.vercel.app](https://url-memory-lyart.vercel.app/)
 
