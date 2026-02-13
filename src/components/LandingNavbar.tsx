@@ -6,6 +6,8 @@ import { Link2 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { User } from "@supabase/supabase-js";
 
+import { toast } from "sonner";
+
 interface LandingNavbarProps {
     user?: User | null;
 }
@@ -29,7 +31,12 @@ export default function LandingNavbar({ user: propUser }: LandingNavbarProps) {
             if (user) setUser(user);
         });
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_OUT') {
+                toast.success("Successfully logged out");
+            } else if (event === 'SIGNED_IN' && session) {
+                toast.success(`Welcome back, ${session.user.user_metadata?.full_name || session.user.email?.split('@')[0]}!`);
+            }
             setUser(session?.user || null);
         });
 

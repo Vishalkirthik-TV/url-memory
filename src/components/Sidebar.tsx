@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Link2, Bookmark, Settings, HelpCircle, LogOut, ChevronLeft, ChevronRight, LayoutGrid } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { toast } from "sonner";
 
 interface SidebarProps {
     userEmail?: string;
@@ -21,8 +22,17 @@ export default function Sidebar({ userEmail }: SidebarProps) {
 
         const handleToggle = () => setIsCollapsed(prev => !prev);
         window.addEventListener('toggle-sidebar', handleToggle);
+
+        // Welcome notification
+        if (userEmail && !sessionStorage.getItem('welcome_shown')) {
+            toast.success(`Welcome back, ${userEmail.split('@')[0]}!`, {
+                description: "You're now logged into Linqs"
+            });
+            sessionStorage.setItem('welcome_shown', 'true');
+        }
+
         return () => window.removeEventListener('toggle-sidebar', handleToggle);
-    }, []);
+    }, [userEmail]);
 
     const menuItems = [
         { icon: Bookmark, label: "Bookmarks", href: "/dashboard" },

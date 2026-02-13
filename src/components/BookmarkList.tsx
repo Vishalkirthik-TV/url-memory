@@ -7,6 +7,8 @@ import { Trash2, Copy, ExternalLink, Globe, Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import BookmarkDetailsModal from "./BookmarkDetailsModal";
 
+import { toast } from "sonner";
+
 interface Bookmark {
     id: string;
     url: string;
@@ -48,6 +50,9 @@ export default function BookmarkList({ initialBookmarks, userId, filter: initial
 
                     if (payload.eventType === 'INSERT') {
                         const newBookmark = payload.new as Bookmark;
+                        toast.success("New bookmark added externally", {
+                            description: newBookmark.title || newBookmark.url
+                        });
                         setBookmarks((current) => {
                             if (current.some(b => b.id === newBookmark.id)) return current;
                             return [newBookmark, ...current];
@@ -59,6 +64,7 @@ export default function BookmarkList({ initialBookmarks, userId, filter: initial
                         );
                     } else if (payload.eventType === 'DELETE') {
                         const deletedId = payload.old.id;
+                        toast.info("A bookmark was removed");
                         setBookmarks((current) =>
                             current.filter((bookmark) => bookmark.id !== deletedId)
                         );
