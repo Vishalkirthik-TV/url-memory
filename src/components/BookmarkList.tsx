@@ -39,48 +39,30 @@ export default function BookmarkList({ initialBookmarks, userId, filter: initial
             .on(
                 'postgres_changes',
                 {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'bookmarks',
-                    filter: `user_id=eq.${userId}`
-                },
-                (payload) => {
-                    console.log("Realtime INSERT received:", payload.new);
-                    const newBookmark = payload.new as Bookmark;
-                    setBookmarks((current) => {
-                        if (current.some(b => b.id === newBookmark.id)) return current;
-                        return [newBookmark, ...current];
-                    });
-                }
-            )
-            .on(
-                'postgres_changes',
-                {
-                    event: 'UPDATE',
+                    event: '*',
                     schema: 'public',
                     table: 'bookmarks',
                 },
                 (payload) => {
-                    console.log("Realtime UPDATE received:", payload.new);
-                    const updatedBookmark = payload.new as Bookmark;
-                    setBookmarks((current) =>
-                        current.map((b) => b.id === updatedBookmark.id ? { ...b, ...updatedBookmark } : b)
-                    );
-                }
-            )
-            .on(
-                'postgres_changes',
-                {
-                    event: 'DELETE',
-                    schema: 'public',
-                    table: 'bookmarks',
-                },
-                (payload) => {
-                    console.log("Realtime DELETE received:", payload.old);
-                    const deletedId = payload.old.id;
-                    setBookmarks((current) =>
-                        current.filter((bookmark) => bookmark.id !== deletedId)
-                    );
+                    console.log("Realtime change received:", payload);
+
+                    if (payload.eventType === 'INSERT') {
+                        const newBookmark = payload.new as Bookmark;
+                        setBookmarks((current) => {
+                            if (current.some(b => b.id === newBookmark.id)) return current;
+                            return [newBookmark, ...current];
+                        });
+                    } else if (payload.eventType === 'UPDATE') {
+                        const updatedBookmark = payload.new as Bookmark;
+                        setBookmarks((current) =>
+                            current.map((b) => b.id === updatedBookmark.id ? { ...b, ...updatedBookmark } : b)
+                        );
+                    } else if (payload.eventType === 'DELETE') {
+                        const deletedId = payload.old.id;
+                        setBookmarks((current) =>
+                            current.filter((bookmark) => bookmark.id !== deletedId)
+                        );
+                    }
                 }
             )
             .subscribe((status) => {

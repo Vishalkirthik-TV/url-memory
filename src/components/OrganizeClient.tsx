@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import { createCategory, deleteCategory, updateBookmarkCategory } from "@/app/actions";
 import { motion, AnimatePresence } from "framer-motion";
+import { createClient } from "@/utils/supabase/client";
 
 interface Bookmark {
     id: string;
@@ -165,6 +166,61 @@ export default function OrganizeClient({ initialBookmarks, initialCategories, us
     const [isAdding, setIsAdding] = useState(false);
     const [newName, setNewName] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
+
+    const [supabase] = useState(() => createClient());
+
+    useEffect(() => {
+        if (!userId) return;
+
+        const channel = supabase
+            .channel(`realtime_organize_${userId}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'bookmarks',
+                },
+                (payload) => {
+                    console.log("Organize realtime change:", payload);
+
+                    if (payload.eventType === 'INSERT') {
+                        const newBookmark = payload.new as Bookmark;
+                        setBookmarks(current => {
+                            if (current.some(b => b.id === newBookmark.id)) return current;
+                            return [newBookmark, ...current];
+                        });
+                    } else if (payload.eventType === 'UPDATE') {
+                        const updatedBookmark = payload.new as Bookmark;
+                        setBookmarks(current =>
+                            current.map(b => b.id === updatedBookmark.id ? { ...b, ...updatedBookmark } : b)
+                        );
+                    } else if (payload.eventType === 'DELETE') {
+                        const deletedId = payload.old.id;
+                        setBookmarks(current =>
+                            current.filter(b => b.id !== deletedId)
+                        );
+                    }
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [supabase, userId]);
+
+    // Sync state with props when they change (server revalidation)
+    useEffect(() => {
+        setBookmarks(current => {
+            const serverIds = new Set(initialBookmarks.map(b => b.id));
+            const recentlyAdded = current.filter(b => !serverIds.has(b.id));
+
+            return [...recentlyAdded, ...initialBookmarks].sort((a, b) =>
+                new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+            );
+        });
+    }, [initialBookmarks]);
 
     const sensors = useSensors(
         useSensor(MouseSensor, {
