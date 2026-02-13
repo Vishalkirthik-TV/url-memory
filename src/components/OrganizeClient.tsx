@@ -183,8 +183,6 @@ export default function OrganizeClient({ initialBookmarks, initialCategories, us
                     table: 'bookmarks',
                 },
                 (payload) => {
-                    console.log("Organize realtime change:", payload);
-
                     if (payload.eventType === 'INSERT') {
                         const newBookmark = payload.new as Bookmark;
                         toast.success("New bookmark added externally", {
@@ -208,6 +206,31 @@ export default function OrganizeClient({ initialBookmarks, initialCategories, us
                     }
                 }
             )
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'categories',
+                },
+                (payload) => {
+                    if (payload.eventType === 'INSERT') {
+                        const newCategory = payload.new as Category;
+                        setCategories(prev => {
+                            if (prev.some(c => c.id === newCategory.id)) return prev;
+                            return [...prev, newCategory];
+                        });
+                        toast.success(`Category "${newCategory.name}" created`);
+                    } else if (payload.eventType === 'DELETE') {
+                        const deletedId = payload.old.id;
+                        setCategories(prev => prev.filter(c => c.id !== deletedId));
+                        toast.info("Category removed");
+                    } else if (payload.eventType === 'UPDATE') {
+                        const updatedCategory = payload.new as Category;
+                        setCategories(prev => prev.map(c => c.id === updatedCategory.id ? updatedCategory : c));
+                    }
+                }
+            )
             .subscribe();
 
         return () => {
@@ -226,6 +249,10 @@ export default function OrganizeClient({ initialBookmarks, initialCategories, us
             );
         });
     }, [initialBookmarks]);
+
+    useEffect(() => {
+        setCategories(initialCategories);
+    }, [initialCategories]);
 
     const sensors = useSensors(
         useSensor(MouseSensor, {
