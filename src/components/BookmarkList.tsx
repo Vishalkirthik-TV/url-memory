@@ -22,6 +22,7 @@ interface BookmarkListProps {
     filter?: 'all' | 'favorites';
 }
 
+
 export default function BookmarkList({ initialBookmarks, userId, filter: initialFilter = 'all' }: BookmarkListProps) {
     const [bookmarks, setBookmarks] = useState<Bookmark[]>(initialBookmarks);
     const [filter, setFilter] = useState<'all' | 'favorites'>(initialFilter);
@@ -219,62 +220,66 @@ export default function BookmarkList({ initialBookmarks, userId, filter: initial
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
                                 key={bookmark.id}
-                                className="group relative col-span-1 rounded-2xl bg-white p-5 border border-gray-200 transition-all hover:border-gray-300 hover:shadow-lg hover:shadow-gray-100/50 cursor-pointer"
-                                onClick={() => setSelectedBookmark(bookmark)}
+                                className="group relative col-span-1"
                             >
-                                <div className="flex items-start justify-between mb-4">
-                                    <div className="h-10 w-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden shrink-0">
-                                        <img
-                                            src={getFaviconUrl(bookmark.url) || ''}
-                                            alt="Icon"
-                                            className="w-5 h-5 object-contain"
-                                            onError={(e) => {
-                                                e.currentTarget.style.display = 'none';
-                                                e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                                            }}
-                                        />
-                                        <Globe className="w-5 h-5 text-gray-400 hidden" />
+                                <div
+                                    onClick={() => setSelectedBookmark(bookmark)}
+                                    className="rounded-2xl bg-white p-5 border border-gray-200 transition-all hover:border-gray-300 hover:shadow-lg hover:shadow-gray-100/50 cursor-pointer relative"
+                                >
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className="h-10 w-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden shrink-0">
+                                            <img
+                                                src={getFaviconUrl(bookmark.url) || ''}
+                                                alt="Icon"
+                                                className="w-5 h-5 object-contain"
+                                                onError={(e) => {
+                                                    e.currentTarget.style.display = 'none';
+                                                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                                }}
+                                            />
+                                            <Globe className="w-5 h-5 text-gray-400 hidden" />
+                                        </div>
+                                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                                            <button
+                                                onClick={() => {
+                                                    console.log("Toggle favorite clicked for ID:", bookmark.id, "Current status:", bookmark.is_favorite);
+                                                    handleToggleFavorite(bookmark.id, !!bookmark.is_favorite);
+                                                }}
+                                                className={`p-1.5 rounded-lg transition-all active:scale-90 ${bookmark.is_favorite === true
+                                                    ? "text-red-500 bg-red-50 hover:bg-red-100"
+                                                    : "text-gray-400 hover:text-red-500 hover:bg-red-50"
+                                                    }`}
+                                                title={bookmark.is_favorite ? "Remove from favorites" : "Add to favorites"}
+                                            >
+                                                <Heart className={`w-4 h-4 ${bookmark.is_favorite === true ? "fill-current" : ""}`} />
+                                            </button>
+                                            <button
+                                                onClick={() => copyToClipboard(bookmark.url)}
+                                                className="p-1.5 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                                                title="Copy URL"
+                                            >
+                                                <Copy className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(bookmark.id)}
+                                                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                title="Delete"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
-                                        <button
-                                            onClick={() => {
-                                                console.log("Toggle favorite clicked for ID:", bookmark.id, "Current status:", bookmark.is_favorite);
-                                                handleToggleFavorite(bookmark.id, !!bookmark.is_favorite);
-                                            }}
-                                            className={`p-1.5 rounded-lg transition-all active:scale-90 ${bookmark.is_favorite === true
-                                                ? "text-red-500 bg-red-50 hover:bg-red-100"
-                                                : "text-gray-400 hover:text-red-500 hover:bg-red-50"
-                                                }`}
-                                            title={bookmark.is_favorite ? "Remove from favorites" : "Add to favorites"}
-                                        >
-                                            <Heart className={`w-4 h-4 ${bookmark.is_favorite === true ? "fill-current" : ""}`} />
-                                        </button>
-                                        <button
-                                            onClick={() => copyToClipboard(bookmark.url)}
-                                            className="p-1.5 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-                                            title="Copy URL"
-                                        >
-                                            <Copy className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(bookmark.id)}
-                                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                            title="Delete"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </div>
 
-                                <div>
-                                    <h3 className="text-sm font-semibold text-gray-900 truncate mb-1">
-                                        {bookmark.title || bookmark.url}
-                                    </h3>
-                                    <div
-                                        className="text-xs text-gray-500 hover:text-indigo-600 truncate block transition-colors flex items-center gap-1"
-                                    >
-                                        {new URL(bookmark.url).hostname}
-                                        <ExternalLink className="w-3 h-3 opacity-50" />
+                                    <div>
+                                        <h3 className="text-sm font-semibold text-gray-900 truncate mb-1">
+                                            {bookmark.title || bookmark.url}
+                                        </h3>
+                                        <div
+                                            className="text-xs text-gray-500 hover:text-indigo-600 truncate block transition-colors flex items-center gap-1"
+                                        >
+                                            {new URL(bookmark.url).hostname}
+                                            <ExternalLink className="w-3 h-3 opacity-50" />
+                                        </div>
                                     </div>
                                 </div>
                             </motion.li>

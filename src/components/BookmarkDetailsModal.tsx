@@ -112,9 +112,9 @@ export default function BookmarkDetailsModal({ bookmark, isOpen, onClose }: Book
                                 {bookmark.description && (
                                     <div className="space-y-2">
                                         <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Summary</h3>
-                                        <p className="text-sm text-gray-600 leading-relaxed bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                                        <div className="text-sm text-gray-600 leading-relaxed bg-gray-50 p-4 rounded-2xl border border-gray-100 italic">
                                             {bookmark.description}
-                                        </p>
+                                        </div>
                                     </div>
                                 )}
 
@@ -123,7 +123,7 @@ export default function BookmarkDetailsModal({ bookmark, isOpen, onClose }: Book
                                         <Calendar className="w-4 h-4 text-indigo-500" />
                                         <div className="flex flex-col">
                                             <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Added on</span>
-                                            <span className="text-xs font-medium text-gray-700">{formatDate(bookmark.created_at)}</span>
+                                            <span className="text-xs font-medium text-gray-700" suppressHydrationWarning>{formatDate(bookmark.created_at)}</span>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3 p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50">

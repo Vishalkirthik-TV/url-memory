@@ -60,7 +60,59 @@ export async function addBookmark(formData: FormData) {
     }
 
     revalidatePath("/dashboard");
+    revalidatePath("/dashboard/organize");
     return { success: true, data: insertedData };
+}
+
+export async function createCategory(name: string, icon?: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return { error: "Must be logged in" };
+
+    const { data, error } = await supabase
+        .from("categories")
+        .insert({
+            name,
+            icon,
+            user_id: user.id
+        })
+        .select()
+        .single();
+
+    if (error) return { error: error.message };
+
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/organize");
+    return { data };
+}
+
+export async function deleteCategory(id: string) {
+    const supabase = await createClient();
+    const { error } = await supabase
+        .from("categories")
+        .delete()
+        .eq("id", id);
+
+    if (error) return { error: error.message };
+
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/organize");
+    return { success: true };
+}
+
+export async function updateBookmarkCategory(bookmarkId: string, categoryId: string | null) {
+    const supabase = await createClient();
+    const { error } = await supabase
+        .from("bookmarks")
+        .update({ category_id: categoryId })
+        .eq("id", bookmarkId);
+
+    if (error) return { error: error.message };
+
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/organize");
+    return { success: true };
 }
 
 export async function deleteBookmark(id: string) {
@@ -73,6 +125,7 @@ export async function deleteBookmark(id: string) {
     }
 
     revalidatePath("/dashboard");
+    revalidatePath("/dashboard/organize");
     return { success: true };
 }
 
@@ -97,6 +150,7 @@ export async function updateProfile(formData: FormData) {
 
     revalidatePath("/dashboard/settings");
     revalidatePath("/dashboard");
+    revalidatePath("/dashboard/organize");
     return { success: true };
 }
 
@@ -113,5 +167,6 @@ export async function toggleFavorite(id: string, isFavorite: boolean) {
     }
 
     revalidatePath("/dashboard");
+    revalidatePath("/dashboard/organize");
     return { success: true };
 }

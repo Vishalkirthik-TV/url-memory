@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Link2, LayoutDashboard, Settings, HelpCircle, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
+import { Link2, Bookmark, Settings, HelpCircle, LogOut, ChevronLeft, ChevronRight, LayoutGrid } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 
@@ -25,7 +25,8 @@ export default function Sidebar({ userEmail }: SidebarProps) {
     }, []);
 
     const menuItems = [
-        { icon: LayoutDashboard, label: "Bookmarks", href: "/dashboard" },
+        { icon: Bookmark, label: "Bookmarks", href: "/dashboard" },
+        { icon: LayoutGrid, label: "Organize", href: "/dashboard/organize" },
         { icon: Settings, label: "Settings", href: "/dashboard/settings" },
     ];
 
@@ -39,9 +40,10 @@ export default function Sidebar({ userEmail }: SidebarProps) {
     return (
         <aside
             style={{ width: isCollapsed ? '80px' : '280px' }}
-            className={`fixed left-0 top-0 h-screen bg-white border-r border-gray-100 z-50 flex flex-col transition-[width,transform] duration-200 ease-in-out shadow-sm
-                max-md:w-[280px] max-md:fixed
+            className={`h-screen bg-white border-r border-gray-100 z-50 flex flex-col transition-[width,transform] duration-200 ease-in-out shadow-sm
+                max-md:fixed max-md:left-0 max-md:top-0 max-md:w-[280px]
                 ${isCollapsed ? 'max-md:-translate-x-full' : 'max-md:translate-x-0'}
+                md:relative
             `}
         >
             {/* Logo Section */}

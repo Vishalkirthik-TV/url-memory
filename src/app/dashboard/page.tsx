@@ -1,6 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
-import Sidebar from "@/components/Sidebar";
 import { redirect } from "next/navigation";
+import Sidebar from "@/components/Sidebar";
 import AddBookmarkForm from "@/components/AddBookmarkForm";
 import BookmarkList from "@/components/BookmarkList";
 import MobileMenuTrigger from "@/components/MobileMenuTrigger";
@@ -13,63 +13,60 @@ export default async function Dashboard() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-        redirect("/login");
+        return redirect("/");
     }
 
-    const { data: bookmarks, error: fetchError } = await supabase
-        .from("bookmarks")
-        .select("*")
-        .order("created_at", { ascending: false });
+    // Fetch bookmarks and categories for the user
+    const [bookmarksRes, categoriesRes] = await Promise.all([
+        supabase
+            .from("bookmarks")
+            .select("*")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false }),
+        supabase
+            .from("categories")
+            .select("*")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false }),
+    ]);
 
-    console.log("Dashboard fetch results:", {
-        count: bookmarks?.length,
-        firstItem: bookmarks?.[0] ? {
-            id: bookmarks[0].id,
-            title: bookmarks[0].title,
-            is_favorite: bookmarks[0].is_favorite
-        } : 'empty',
-        error: fetchError
-    });
+    const initialBookmarks = bookmarksRes.data || [];
+    const categories = categoriesRes.data || [];
 
-    // Helper for time-based greeting
-    const getGreeting = () => {
-        const hour = new Date().getHours();
-        if (hour < 12) return "Good morning";
-        if (hour < 18) return "Good afternoon";
-        return "Good evening";
-    };
-
-    // Get username from email (before the @)
-    const username = user.email?.split('@')[0] || 'User';
-    const capitalizedUsername = username.charAt(0).toUpperCase() + username.slice(1);
+    // Simple greeting logic
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+    const username = user.email?.split("@")[0] || "there";
 
     return (
-        <div className="min-h-screen bg-gray-50/50 flex transition-all duration-300">
-            <Sidebar userEmail={user.email} />
+        <div className="flex h-screen bg-[#F8FAFC]">
+            <Sidebar
+                userEmail={user.email}
+            />
 
-            <main className="flex-1 transition-all duration-300 ml-0 md:ml-[280px] lg:ml-[280px] group-data-[collapsed=true]:md:ml-[80px] px-4 py-12 sm:px-6 lg:px-8">
+            <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
                 <MobileMenuTrigger icon="dashboard" />
+                <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-8 lg:px-12">
+                    <div className="max-w-5xl mx-auto space-y-12">
+                        {/* Header */}
+                        <header className="space-y-4">
+                            <div className="space-y-1">
+                                <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+                                    {greeting}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600 capitalize">{username}</span>
+                                </h1>
+                                <p className="text-gray-500 font-medium">Welcome back to your workspace.</p>
+                            </div>
+                            <div className="pt-2">
+                                <AddBookmarkForm />
+                            </div>
+                        </header>
 
-                {/* Header Section */}
-                <div className="mb-12 space-y-4 text-center">
-                    <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900">
-                        {getGreeting()}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">{capitalizedUsername}</span>
-                    </h1>
-                    <p className="text-lg text-gray-500 max-w-2xl mx-auto">
-                        Your personal space to curate and organize the web.
-                    </p>
-                </div>
-
-                <div className="space-y-16">
-                    {/* Add Bookmark Section */}
-                    <section className="max-w-2xl mx-auto w-full relative z-10 transition-all duration-300">
-                        <AddBookmarkForm />
-                    </section>
-
-                    {/* Bookmarks Grid */}
-                    <section className="relative z-20">
-                        <BookmarkList initialBookmarks={bookmarks || []} userId={user.id} />
-                    </section>
+                        {/* Content */}
+                        <BookmarkList
+                            initialBookmarks={initialBookmarks}
+                            userId={user.id}
+                        />
+                    </div>
                 </div>
             </main>
         </div>
