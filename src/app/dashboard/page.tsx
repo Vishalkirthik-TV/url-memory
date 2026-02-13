@@ -67,7 +67,7 @@ export default async function Dashboard() {
                     </section>
 
                     {/* Bookmarks Grid */}
-                    <section className="relative z-0">
+                    <section className="relative z-20">
                         <BookmarkList initialBookmarks={bookmarks || []} userId={user.id} />
                     </section>
                 </div>

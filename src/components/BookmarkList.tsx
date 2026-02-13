@@ -5,11 +5,13 @@ import { createClient } from "@/utils/supabase/client";
 import { deleteBookmark, toggleFavorite } from "@/app/actions";
 import { Trash2, Copy, ExternalLink, Globe, Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import BookmarkDetailsModal from "./BookmarkDetailsModal";
 
 interface Bookmark {
     id: string;
     url: string;
     title: string | null;
+    description?: string | null;
     is_favorite: boolean;
     created_at: string;
 }
@@ -23,6 +25,7 @@ interface BookmarkListProps {
 export default function BookmarkList({ initialBookmarks, userId, filter: initialFilter = 'all' }: BookmarkListProps) {
     const [bookmarks, setBookmarks] = useState<Bookmark[]>(initialBookmarks);
     const [filter, setFilter] = useState<'all' | 'favorites'>(initialFilter);
+    const [selectedBookmark, setSelectedBookmark] = useState<Bookmark | null>(null);
     // Create Supabase client only once
     const [supabase] = useState(() => createClient());
 
@@ -216,7 +219,8 @@ export default function BookmarkList({ initialBookmarks, userId, filter: initial
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
                                 key={bookmark.id}
-                                className="group relative col-span-1 rounded-2xl bg-white p-5 border border-gray-200 transition-all hover:border-gray-300 hover:shadow-lg hover:shadow-gray-100/50"
+                                className="group relative col-span-1 rounded-2xl bg-white p-5 border border-gray-200 transition-all hover:border-gray-300 hover:shadow-lg hover:shadow-gray-100/50 cursor-pointer"
+                                onClick={() => setSelectedBookmark(bookmark)}
                             >
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="h-10 w-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden shrink-0">
@@ -231,7 +235,7 @@ export default function BookmarkList({ initialBookmarks, userId, filter: initial
                                         />
                                         <Globe className="w-5 h-5 text-gray-400 hidden" />
                                     </div>
-                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
                                         <button
                                             onClick={() => {
                                                 console.log("Toggle favorite clicked for ID:", bookmark.id, "Current status:", bookmark.is_favorite);
@@ -266,21 +270,24 @@ export default function BookmarkList({ initialBookmarks, userId, filter: initial
                                     <h3 className="text-sm font-semibold text-gray-900 truncate mb-1">
                                         {bookmark.title || bookmark.url}
                                     </h3>
-                                    <a
-                                        href={bookmark.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
+                                    <div
                                         className="text-xs text-gray-500 hover:text-indigo-600 truncate block transition-colors flex items-center gap-1"
                                     >
                                         {new URL(bookmark.url).hostname}
                                         <ExternalLink className="w-3 h-3 opacity-50" />
-                                    </a>
+                                    </div>
                                 </div>
                             </motion.li>
                         ))}
                     </AnimatePresence>
                 </ul>
             )}
+
+            <BookmarkDetailsModal
+                bookmark={selectedBookmark}
+                isOpen={!!selectedBookmark}
+                onClose={() => setSelectedBookmark(null)}
+            />
         </div>
     );
 }
